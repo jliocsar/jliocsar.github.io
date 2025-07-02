@@ -1,0 +1,17 @@
+(html
+  (head
+    (title 'Julio Cesar')
+    (meta charset: 'utf-8')
+    (meta name: 'viewport', content: 'width=device-width, initial-scale=1.0')
+    (style (require 'styles.css')))
+  (body
+    (main
+      (article
+        (section
+          (h1 'Julio Cesar')
+          (p 'Hey! 👋')
+          (p 'Passionate about problem solving and learning new tech. I work mainly with TypeScript.'))
+        (section
+          (div class: 'flex-column',
+            (a href: 'https://github.com/jliocsar', target: '_blank', 'GitHub')
+            (a href: 'https://linkedin.com/in/jliocsar', target: '_blank', 'LinkedIn')))))))

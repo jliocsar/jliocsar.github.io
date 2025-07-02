@@ -1,0 +1,16 @@
+{
+  "name": "jliocsar.github.io",
+  "module": "index.ts",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "build": "bun run src/build.civet"
+  },
+  "devDependencies": {
+    "@danielx/civet": "^0.10.5",
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  }
+}

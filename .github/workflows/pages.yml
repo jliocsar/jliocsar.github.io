@@ -17,11 +17,15 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
+        
+      - name: Install Bun
+        uses: oven-sh/setup-bun@v2
+      
+      - name: Install dependencies
+        run: bun install
 
-      - name: Build custom index.html
-        run: |
-          mkdir -p _site
-          echo "<!DOCTYPE html><html><head><title>My Page</title></head><body><h1>Hello from custom build!</h1></body></html>" > _site/index.html
+      - name: Build site
+        run: bun run build
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3

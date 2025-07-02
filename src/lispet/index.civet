@@ -1,0 +1,75 @@
+fs from node:fs
+path from node:path
+vm from node:vm
+{ compile } from @danielx/civet
+
+// Supported HTML attributes aliases
+HTML_ATTRIBUTE_ALIAS := {
+  #: "id"
+}
+
+// Supported HTML tags
+HTML_TAGS := []
+  :div, :header, :main, :footer
+  :section, :article, :small, :h1
+  :p, :a, :span, :title, :head
+  :meta, :link, :body, :html, :style
+as const
+
+// Creates a function that generates an HTML tag with the given attributes and content
+html := <T < string>(tag: T) ->
+  (attributesRecordOrHtmlPart: Record<string, string> | string, ...parts: string[]) ->
+    attributes :=
+      unless typeof attributesRecordOrHtmlPart is 'string' then
+        Object.entries attributesRecordOrHtmlPart 
+          |> .map ([key, value]) ->
+            if key in HTML_ATTRIBUTE_ALIAS then
+              ` ${HTML_ATTRIBUTE_ALIAS[key as keyof typeof HTML_ATTRIBUTE_ALIAS]}="${value}"`
+            else
+              ` ${key}="${value}"`
+          |> .join ""
+      else
+        parts.unshift attributesRecordOrHtmlPart
+        null
+    content := parts.join ""
+    `<${tag}${attributes or ""}>${content}</${tag}>`
+
+// Template literal for CSS
+css := (parts: TemplateStringsArray) ->
+  parts
+    |> .join ""
+    |> .replace(/\n/g, '')
+    |> .replace(/\s+/g, ' ')
+    |> .trim()
+
+// Reads a file from the `src` directory and returns its content
+// Used to include CSS files in the HTML template
+htmlRequire := (filePath: string) ->
+  fs.readFileSync (path.join 'src', filePath), encoding: 'utf-8'
+
+// Create a map of HTML tags to their corresponding functions
+tags := HTML_TAGS
+  |> .map ({ description: tag }) -> [tag, html tag!]
+  |> Object.fromEntries
+
+// Renders the HTML template and returns the result
+export render := (templatePath: string) -> {
+  // Read the template file
+  content := fs.readFileSync templatePath, encoding: 'utf-8'
+  // Compile the template to a JavaScript function
+  htmlBuilder := await compile content, { +js }
+
+  // Create a context object to pass to the JavaScript function
+  ctx := {
+    ...tags
+    css
+    require: htmlRequire
+    result: null as string | null
+  } as const
+
+  // Run the JavaScript function in the context and store the result in the context
+  vm.runInNewContext `result = (${htmlBuilder})`, ctx
+  
+  // Return the result as a string
+  ctx.result as string
+}

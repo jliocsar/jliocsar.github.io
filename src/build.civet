@@ -1,0 +1,22 @@
+fs from node:fs
+{ log } from node:console
+
+{ render } from ./lispet/index.civet
+
+// Output directory for the static site
+outputDir := '_site'
+
+// Read the `index.cml` file and render it to HTML
+log 'Rendering index.cml...'
+indexHtml := await render 'src/index.cml'
+
+// Create the output directory if it doesn't exist
+unless fs.existsSync outputDir
+  log 'Creating output directory...'
+  fs.mkdirSync outputDir
+
+// Write the rendered HTML to the output directory
+log 'Writing index.html...'
+fs.writeFileSync `${outputDir}/index.html`, indexHtml
+
+log 'Done!'
